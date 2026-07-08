@@ -21,15 +21,30 @@ jobs:
         with:
           gradle-version: '8.5'
           
-      - name: Build JAR all
-        run: gradle shadowJar -x test --no-daemon --stacktrace
-        
+      - name: Build all modules JAR
+        run: |
+          cat > build.gradle.kts << 'EOF'
+          plugins {
+            id("com.github.johnrengelman.shadow") version "8.1.1"
+          }
+          dependencies {
+            implementation(project(":bitcoinj-core"))
+            implementation(project(":bitcoinj-wallet"))
+            implementation(project(":bitcoinj-base"))
+            implementation(project(":bitcoinj-protobuf"))
+          }
+          tasks.shadowJar {
+            archiveClassifier.set("all")
+            mergeServiceFiles()
+          }
+          EOF
+          gradle shadowJar -x test --no-daemon --stacktrace
+          
       - name: List built files
         run: find . -name "*-all.jar"
         
       - name: Upload JAR
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: bitcoinj-all-0.17.1
           path: build/libs/*-all.jar
