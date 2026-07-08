@@ -1,4 +1,4 @@
-name: Build bitcoinj modules
+name: Build bitcoinj 0.17.1 JAR
 
 on:
   workflow_dispatch:
@@ -21,17 +21,17 @@ jobs:
         with:
           gradle-version: '8.5'
           
-      - name: Build all bitcoinj modules
-        run: gradle :bitcoinj-core:jar :bitcoinj-base:jar :bitcoinj-wallet:jar :bitcoinj-protobuf:jar -x test --no-daemon
+      - name: List modules
+        run: gradle projects
         
-      - name: Collect JARs
-        run: |
-          mkdir bitcoinj-jars
-          find . -path "*/build/libs/*.jar" ! -name "*-plain.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} bitcoinj-jars/ \;
-          ls -lh bitcoinj-jars/
+      - name: Build core JAR
+        run: gradle :bitcoinj-core:jar -x test --no-daemon
         
-      - name: Upload JARs
+      - name: List built files
+        run: find . -name "*.jar" ! -name "*-plain.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar"
+        
+      - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
-          name: bitcoinj-modules
-          path: bitcoinj-jars/*.jar
+          name: bitcoinj-core-0.17.1
+          path: "core/build/libs/*.jar"
