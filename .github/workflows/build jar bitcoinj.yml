@@ -22,13 +22,14 @@ jobs:
           gradle-version: '8.5'
           
       - name: Build JAR all
-        run: ./gradlew shadowJar -x test --no-daemon --stacktrace
+        run: gradle shadowJar -x test --no-daemon --stacktrace
         
       - name: List built files
         run: find . -name "*-all.jar"
         
       - name: Upload JAR
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: bitcoinj-all-0.17.1
           path: build/libs/*-all.jar
