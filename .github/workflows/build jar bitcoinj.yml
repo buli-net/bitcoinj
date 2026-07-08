@@ -24,7 +24,12 @@ jobs:
           echo '' >> core/build.gradle
           echo 'shadowJar { mergeServiceFiles(); archiveClassifier.set("all") }' >> core/build.gradle
           
-      - name: Build shadowJar
+      - name: Build with Gradle 8.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+          
+      - name: Run shadowJar
         run: gradle :core:shadowJar -x test --no-daemon --stacktrace
         
       - name: Upload JAR
