@@ -1,4 +1,4 @@
-name: Build bitcoinj with Containerfile
+name: Build bitcoinj 0.17.1 all JAR
 
 on:
   workflow_dispatch:
@@ -7,23 +7,28 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - name: Git checkout
+      - name: Git checkout v0.17.1
         uses: actions/checkout@v4
-        
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        
-      - name: Build with Containerfile
-        run: |
-          docker build --file build.Containerfile --output out .
+        with:
+          ref: v0.17.1
           
-      - name: List output
-        run: find out -name "*.jar"
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          
+      - name: Patch core/build.gradle for shadowJar
+        run: |
+          sed -i '1i plugins { id "com.github.johnrengelman.shadow" version "8.1.1" }' core/build.gradle
+          echo '' >> core/build.gradle
+          echo 'shadowJar { mergeServiceFiles(); archiveClassifier.set("all") }' >> core/build.gradle
+          
+      - name: Build shadowJar
+        run: gradle :core:shadowJar -x test --no-daemon --stacktrace
         
-      - name: Upload JARs
+      - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
-          name: bitcoinj-0.17.1-build
-          path: |
-            out/core/*.jar
-            out/wallettool/
+          name: bitcoinj-core-0.17.1-all
+          path: core/build/libs/*-all.jar
