@@ -21,15 +21,14 @@ jobs:
         with:
           gradle-version: '8.5'
           
-      - name: Build JAR
-        run: gradle :bitcoinj-core:jar -x test --no-daemon --stacktrace
+      - name: Build JAR all
+        run: ./gradlew shadowJar -x test --no-daemon --stacktrace
         
       - name: List built files
-        run: find . -name "*.jar"
+        run: find . -name "*-all.jar"
         
       - name: Upload JAR
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: bitcoinj-core-0.17.1
-          path: "core/build/libs/*.jar"  # Đổi chỗ này
+          name: bitcoinj-all-0.17.1
+          path: build/libs/*-all.jar
