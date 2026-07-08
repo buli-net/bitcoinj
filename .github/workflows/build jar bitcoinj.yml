@@ -1,4 +1,4 @@
-name: Build bitcoinj 0.17.1 JAR
+name: Build bitcoinj modules
 
 on:
   workflow_dispatch:
@@ -21,30 +21,17 @@ jobs:
         with:
           gradle-version: '8.5'
           
-      - name: Build all modules JAR
-        run: |
-          cat > build.gradle.kts << 'EOF'
-          plugins {
-            id("com.github.johnrengelman.shadow") version "8.1.1"
-          }
-          dependencies {
-            implementation(project(":bitcoinj-core"))
-            implementation(project(":bitcoinj-wallet"))
-            implementation(project(":bitcoinj-base"))
-            implementation(project(":bitcoinj-protobuf"))
-          }
-          tasks.shadowJar {
-            archiveClassifier.set("all")
-            mergeServiceFiles()
-          }
-          EOF
-          gradle shadowJar -x test --no-daemon --stacktrace
-          
-      - name: List built files
-        run: find . -name "*-all.jar"
+      - name: Build all bitcoinj modules
+        run: gradle :bitcoinj-core:jar :bitcoinj-base:jar :bitcoinj-wallet:jar :bitcoinj-protobuf:jar -x test --no-daemon
         
-      - name: Upload JAR
+      - name: Collect JARs
+        run: |
+          mkdir bitcoinj-jars
+          find . -path "*/build/libs/*.jar" ! -name "*-plain.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} bitcoinj-jars/ \;
+          ls -lh bitcoinj-jars/
+        
+      - name: Upload JARs
         uses: actions/upload-artifact@v4
         with:
-          name: bitcoinj-all-0.17.1
-          path: build/libs/*-all.jar
+          name: bitcoinj-modules
+          path: bitcoinj-jars/*.jar
