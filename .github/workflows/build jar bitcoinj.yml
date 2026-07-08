@@ -21,13 +21,14 @@ jobs:
         with:
           gradle-version: '8.5'
           
-      - name: Patch bitcoinj-core build.gradle
+      - name: Patch core/build.gradle
         run: |
-          sed -i '1i plugins { id "com.github.johnrengelman.shadow" version "8.1.1" }' core/build.gradle.kts
-          echo 'tasks.shadowJar { mergeServiceFiles() }' >> core/build.gradle.kts
+          sed -i '1i plugins { id "com.github.johnrengelman.shadow" version "8.1.1" }' core/build.gradle
+          echo '' >> core/build.gradle
+          echo 'shadowJar { mergeServiceFiles() }' >> core/build.gradle
           
       - name: Build shadowJar
-        run: gradle :bitcoinj-core:shadowJar -x test --no-daemon --stacktrace
+        run: gradle :core:shadowJar -x test --no-daemon --stacktrace
         
       - name: List built files
         run: find core/build/libs -name "*-all.jar"
