@@ -16,10 +16,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           
+      - name: Set up Gradle 8.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+          
       - name: Build JAR, skip test + protobuf
-        run: |
-          chmod +x gradlew
-          ./gradlew :core:jar -x test -x generateProto --no-daemon --stacktrace
+        run: gradle :core:jar -x test -x generateProto --no-daemon --stacktrace
         
       - name: Upload JAR
         uses: actions/upload-artifact@v4
